@@ -1,0 +1,6 @@
+# Ignore all files and folders
+/*
+# Whitelist these
+!.gitignore
+!README.md
+!AdvancedTopicsOnComputerVision/

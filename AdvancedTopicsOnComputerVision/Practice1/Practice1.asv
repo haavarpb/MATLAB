@@ -8,8 +8,8 @@ cd ..
 
 figure; imshow(I)
 title('Original picture');
-sz = size(I);
-PQ = paddedsize(sz);
+
+PQ = paddedsize(size(I));
 
 F = fft2(I ,PQ(1), PQ(2));
 S = fftshift(F);
@@ -29,8 +29,7 @@ title('Filtered image log(abs(G)) + 1 (in freq plane)')
 O = abs(ifft2(G));
 figure; imshow(O, [])
 
-I_filtered = O(1:sz(2), 1:sz(1));
-figure; imshow(I_filtered, []);
+
 
 function f = Gaussian(M, N, sig)
 if(mod(M,2) == 0)

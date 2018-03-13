@@ -17,6 +17,7 @@ figure; imshow(log(abs(S) + 1), [])
 title('Fourier transform shifted log(abs(S)) + 1')
 
 H = gaussianFilter(100, 100, PQ(2), PQ(1), 0);
+H = 1 - H;
 figure; surf(H)
 title('2D gaussian filter')
 

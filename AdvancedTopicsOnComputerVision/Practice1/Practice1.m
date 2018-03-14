@@ -55,7 +55,7 @@ title('Filtered image without inverse shift')
 % Find distances from every element to the origin (1,1)
 N = max(size(U));
 
-y_sq = repmat(diag(0:N)*(0:N)', 1, N);
+y_sq = repmat(diag(1:N)*(1:N)', 1, N);
 x_sq = y_sq';
 
 d_sq = x_sq + y_sq;
@@ -64,12 +64,20 @@ d_sq = d_sq(1:size(U,2), 1:size(U,1));
 
 % Find distances from every element to the origin (N/2, M/2)
 
-% TODO : Use d_sq and mirror it. Extraxt then the middle according to size
+N = size(U, 1);
+M = size(U, 2);
 
-% x_mean = round(N/2);
-% y_mean = round(M/2);
-% x_sq_mid = repmat(diag(abs((0:N)-x_mean))*abs((0:N) - x_mean)', 1, max(M,N));
-% y_sq_mid = repmat(diag(abs((0:M)-y_mean))*abs((0:M) - y_mean)', 1, max(M,N));
-% 
-% d_sq_mid = x_sq_mid + y_sq_mid;
-% d_sq_mid = d_sq_mid(1:(M-1), 1:(N-1));
+lower_left = fliplr(d_sq);
+upper_left = flipud(lower_left);
+upper_right = fliplr(upper_left);
+lower_right = d_sq;
+
+d_non_cropped = [upper_left, upper_right;
+                lower_left, lower_right];
+sz = size(d_non_cropped);
+% Now we extract the core
+
+d_sq_mid = d_non_cropped((round(sz(1)/2) - round(M/2)):(round(sz(1)/2) + round(M/2)), ...
+                         (round(sz(2)/2) - round(N/2)):(round(sz(2)/2) + round(N/2)));
+                     
+

@@ -19,7 +19,7 @@ figure; imshow(log(abs(S) + 1), [])
 title('Fourier transform shifted (showing log(abs(S)) + 1)')
 
 H = gaussianFilter(100, 100, PQ(2), PQ(1), 0);
-H = 1 - H./max(max(H)); % Normalize the filter
+H = H./max(max(H)); % Normalize the filter
 figure; surf(H)
 title('2D gaussian filter')
 
@@ -96,7 +96,7 @@ title('Filtered');
 %% Exercise 4.5
 
 cd 'Pictures'
-moon = imread('moon.tif');
+moon = imread('moon.jpg');
 cd ..
 
 moon_fft = fft2(moon);
@@ -250,6 +250,44 @@ surf(filter_e);
 shading interp
 
 %% Problem 1
+
+cd 'C:\Users\Håvard\Documents\MATLAB\AdvancedTopicsOnComputerVision\Practice1\Pictures'
+moon = imread('moon.jpg');
+cd ..
+
+moon_fft = fft2(moon);
+
+moon_dim = size(moon);
+
+close all;
+A_max = 256/2;
+A = A_max*0.3;
+w = 1;
+d = 0;
+n = createSineNoise(moon_dim(1), moon_dim(2), A, w, d);
+
+moon_N = moon + uint8(n);
+
+% Show moon with added noise
+figure; imshow(moon_N);
+
+% Show noise
+figure; imshow(uint8(n), []);
+
+moon_NF = fft2(moon_N);
+moon_NFS = abs(fftshift(moon_NF));
+
+% Spectrum
+figure; imshow(log(moon_NFS) + 1, []);
+figure; surf(log(moon_NFS) + 1);
+hold on
+
+% Finding peaks
+avg = mean(mean(moon_NFS));
+
+moon_col = im2col(moon_NFS, [moon_dim(1) moon_dim(2)], 'distinct');
+[pks loc] = findpeaks(moon_col, 'MinPeakDistance', 50, 'MinPeakHeight', 1/100*max(moon_col));
+surf(log(1/100*max(moon_col)*ones(size(moon_NFS))) + 1);
 
 
 

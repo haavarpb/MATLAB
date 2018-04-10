@@ -8,32 +8,29 @@ cd Pictures
 f = im2double(imread('lena.gif'));
 cd ..
 
-figure; imshow(f)
-title('Original picture');
+showImage(f, 'Original picture');
 
-sz = size(f);
-PQ = paddedsize(sz);
+size_f = size(f);
+PQ = paddedsize(size_f);
 F = fft2(f ,PQ(1), PQ(2));
 S = fftshift(F); % Shift the spectrum origo to middle
-figure; imshow(log(abs(S) + 1), [])
-title('Fourier transform shifted (showing log(abs(S)) + 1)')
+
+showSpectrum(S, 'Fourier transform shifted (showing log(abs(S) + 1)');
 
 H = gaussianFilter(100, 100, PQ(2), PQ(1), 0);
 H = H./max(max(H)); % Normalize the filter
-figure; surf(H)
-title('2D gaussian filter')
+
+showSurf(H, '2D Gaussian filter')
 
 G = H.*S; % Apply filter
-figure; imshow(log(abs(G)) + 1, [])
-title('Filter applied (showing log(abs(G)) + 1)')
 
-f = real(ifft2(G)); 
-figure; imshow(f, [])
-title('Filtered image with padding')
+showSpectrum(G, '2D Gaussian filter applied');
 
-f_cropped = f(1:sz(2), 1:sz(1));
-figure; imshow(f_cropped, []);
-title('Filtered image')
+f = real(ifft2(ifftshift(G))); 
+
+showImage(f, 'Filtered image with padding');
+
+showImage(f(1:sz(1), 1:sz(2)), 'Filtered image cropped');
 
 %% Exercise 4.1
 % We modified the spectrum by applying a filter similar to the gaussian
@@ -41,9 +38,8 @@ title('Filtered image')
 
 %% Exercise 4.2 
 
-f_no_inv_shift = real(G); 
-figure; imshow(f_no_inv_shift, [])
-title('Filtered image without inverse shift')
+f_no_inv_shift = real(ifft2(G));
+showImage(f_no_inv_shift, 'No inverse shift applied');
 
 % It is evident that the inverse shift is important to do before the
 % inverse transform.
@@ -84,25 +80,25 @@ d_sq_mid = d_non_cropped((round(sz(1)/2) - round(M/2)):(round(sz(1)/2) + round(M
 % See lpfilter.m
 
 H = lpfilter('gauss', size(S,1), size(S,2), 100);
-figure; surf(fftshift(H));
+showSurf(fftshift(H), 'Gaussian filter');
 filtered_s = fftshift(H).*S;
 filtered = fftshift(filtered_s);
-f_spatial = abs(ifft2(filtered));
-figure; imshow(f_spatial, []);
-figure; imshow(f_spatial(1:size(f_spatial,1)/2, 1:size(f_spatial,2)/2), [])
-
-title('Filtered');
+f_spatial = real(ifft2(filtered));
+showImage(f_spatial, 'High passed image');
+showImage(f_spatial(1:sz(1), 1:sz(2)), 'High passed image cropped');
 
 %% Exercise 4.5
 
-cd 'Pictures'
+cd C:\Users\Håvard\Documents\MATLAB\AdvancedTopicsOnComputerVision\Practice1\Pictures
 moon = imread('moon.jpg');
 cd ..
 
-moon_fft = fft2(moon);
+orgSize = size(moon);
+PQ = paddedsize(orgSize);
+moon_fft = fftshift(fft2(moon, PQ(1), PQ(2)));
+moon_dim = PQ;
 
-moon_dim = size(moon);
-
+% Filter size (Depends on the type)
 size_f = 100;
 
 % Create all the filters
@@ -112,10 +108,10 @@ btw_f4 = fftshift(lpfilter('btw', moon_dim(1), moon_dim(2), size_f, 4));
 ideal_f = fftshift(lpfilter('ideal', moon_dim(1), moon_dim(2), size_f));
 
 % Apply filter and inverse transform
-moon_g = real(ifft2(moon_fft.*gauss_f));
-moon_b2 = real(ifft2(moon_fft.*btw_f2));
-moon_b4 = real(ifft2(moon_fft.*btw_f4));
-moon_i = real(ifft2(moon_fft.*ideal_f));
+moon_g = real(ifft2(ifftshift(moon_fft.*gauss_f)));
+moon_b2 = real(ifft2(ifftshift(moon_fft.*btw_f2)));
+moon_b4 = real(ifft2(ifftshift(moon_fft.*btw_f4)));
+moon_i = real(ifft2(ifftshift(moon_fft.*ideal_f)));
 
 % Plot gaussian
 
@@ -123,7 +119,7 @@ figure
 subplot(1,3,1);
 imshow(moon, []);
 subplot(1,3,2);
-imshow(moon_g, []);
+imshow(moon_g(1:orgSize(1), 1:orgSize(2)), []);
 title('Original, filtered and the gaussian filter');
 subplot(1,3,3);
 surf(gauss_f);
@@ -135,7 +131,7 @@ figure
 subplot(1,3,1);
 imshow(moon, []);
 subplot(1,3,2);
-imshow(moon_b2, []);
+imshow(moon_b2(1:orgSize(1), 1:orgSize(2)), []);
 title('Original, filtered and the 2nd order Butterworth filter');
 subplot(1,3,3);
 surf(btw_f2);
@@ -147,7 +143,7 @@ figure
 subplot(1,3,1);
 imshow(moon, []);
 subplot(1,3,2);
-imshow(moon_b4, []);
+imshow(moon_b4(1:orgSize(1), 1:orgSize(2)), []);
 title('Original, filtered and the 4th order Butterworth filter');
 subplot(1,3,3);
 surf(btw_f4);
@@ -159,7 +155,7 @@ figure
 subplot(1,3,1);
 imshow(moon, []);
 subplot(1,3,2);
-imshow(moon_i, []);
+imshow(moon_i(1:orgSize(1), 1:orgSize(2)), []);
 title('Original, filtered and the ideal low pass filter');
 subplot(1,3,3);
 surf(ideal_f);
@@ -169,7 +165,12 @@ shading interp
 %% Exercise 4.6
 % See hpfilter 
 
-size_f = 50;
+orgSize = size(moon);
+PQ = paddedsize(orgSize);
+moon_fft = fftshift(fft2(moon, PQ(1), PQ(2)));
+moon_dim = PQ;
+
+size_f = 100;
 
 % Create all the filters
 gauss_f = fftshift(hpfilter('gauss', moon_dim(1), moon_dim(2), size_f));
@@ -178,10 +179,10 @@ btw_f4 = fftshift(hpfilter('btw', moon_dim(1), moon_dim(2), size_f, 4));
 ideal_f = fftshift(hpfilter('ideal', moon_dim(1), moon_dim(2), size_f));
 
 % Apply filter and inverse transform
-moon_g = real(ifft2(moon_fft.*gauss_f));
-moon_b2 = real(ifft2(moon_fft.*btw_f2));
-moon_b4 = real(ifft2(moon_fft.*btw_f4));
-moon_i = real(ifft2(moon_fft.*ideal_f));
+moon_g = real(ifft2(ifftshift(moon_fft.*gauss_f)));
+moon_b2 = real(ifft2(ifftshift(moon_fft.*btw_f2)));
+moon_b4 = real(ifft2(ifftshift(moon_fft.*btw_f4)));
+moon_i = real(ifft2(ifftshift(moon_fft.*ideal_f)));
 
 % Plot gaussian
 
@@ -189,7 +190,7 @@ figure
 subplot(1,3,1);
 imshow(moon, []);
 subplot(1,3,2);
-imshow(moon_g, []);
+imshow(moon_g(1:orgSize(1), 1:orgSize(2)), []);
 title('Original, filtered and the gaussian filter');
 subplot(1,3,3);
 surf(gauss_f);
@@ -201,7 +202,7 @@ figure
 subplot(1,3,1);
 imshow(moon, []);
 subplot(1,3,2);
-imshow(moon_b2, []);
+imshow(moon_b2(1:orgSize(1), 1:orgSize(2)), []);
 title('Original, filtered and the 2nd order Butterworth filter');
 subplot(1,3,3);
 surf(btw_f2);
@@ -213,7 +214,7 @@ figure
 subplot(1,3,1);
 imshow(moon, []);
 subplot(1,3,2);
-imshow(moon_b4, []);
+imshow(moon_b4(1:orgSize(1), 1:orgSize(2)), []);
 title('Original, filtered and the 4th order Butterworth filter');
 subplot(1,3,3);
 surf(btw_f4);
@@ -225,7 +226,7 @@ figure
 subplot(1,3,1);
 imshow(moon, []);
 subplot(1,3,2);
-imshow(moon_i, []);
+imshow(moon_i(1:orgSize(1), 1:orgSize(2)), []);
 title('Original, filtered and the ideal high pass filter');
 subplot(1,3,3);
 surf(ideal_f);
@@ -237,13 +238,13 @@ b = 2.0;
 
 filter_e = fftshift(hpfilterEmphasis('ideal', moon_dim(1), moon_dim(2), size_f, a, b));
 
-moon_e = real(ifft2(moon_fft.*filter_e));
+moon_e = real(ifft2(ifftshift(moon_fft.*filter_e)));
 
 figure
 subplot(1,3,1);
 imshow(moon, []);
 subplot(1,3,2);
-imshow(moon_e, []);
+imshow(moon_e(1:orgSize(1), 1:orgSize(2)), []);
 title('Original, filtered and the ideal emphasis filter');
 subplot(1,3,3);
 surf(filter_e);
@@ -255,40 +256,82 @@ cd 'C:\Users\Håvard\Documents\MATLAB\AdvancedTopicsOnComputerVision\Practice1\Pi
 moon = imread('moon.jpg');
 cd ..
 
-moon_fft = fft2(moon);
-
-moon_dim = size(moon);
+orgSize = size(moon);
 
 close all;
 A_max = 256/2;
-A = A_max*0.3;
-w = 1;
+A = A_max*0.5;
+w = 0.5;
 d = 0;
-n = createSineNoise(moon_dim(1), moon_dim(2), A, w, d);
+n = createSineNoise(orgSize(1), orgSize(2), A, w, d);
 
 moon_N = moon + uint8(n);
 
 % Show moon with added noise
-figure; imshow(moon_N);
+showImage(moon_N, 'Moon with added noise');
 
 % Show noise
-figure; imshow(uint8(n), []);
+showImage(uint8(n), 'Noise');
 
-moon_NF = fft2(moon_N);
-moon_NFS = abs(fftshift(moon_NF));
+PQ = paddedsize(orgSize);
+moon_NF = fft2(moon_N, PQ(1), PQ(2));
+moon_NFS = fftshift(moon_NF);
 
 % Spectrum
-figure; imshow(log(moon_NFS) + 1, []);
-figure; surf(log(moon_NFS) + 1);
+showSpectrum(moon_NFS, '');
+showSurf(log(abs(moon_NFS) + 1), '');
 hold on
 
 % Finding peaks
 avg = mean(mean(moon_NFS));
 
-moon_col = im2col(moon_NFS, [moon_dim(1) moon_dim(2)], 'distinct');
-[pks loc] = findpeaks(moon_col, 'MinPeakDistance', 50, 'MinPeakHeight', 1/100*max(moon_col));
-surf(log(1/100*max(moon_col)*ones(size(moon_NFS))) + 1);
+moon_col = im2col(abs(moon_NFS), [moon_dim(1) moon_dim(2)], 'distinct');
+[pks, loc, widths, proms] = findpeaks(moon_col, 'MinPeakDistance', 20, 'MinPeakHeight', 1/100*max(moon_col));
+surf(log(1/100*max(moon_col)*ones(size(moon_NFS)) + 1));
+shading interp
 
+% Remove peaks from low frequenzy areas which we want to keep. I.E. we
+% assume noise to be high frequency
 
+toBeKept = zeros(length(pks), 1);
+center = moon_dim./2;
+distance = 50;
+for peak = 1:length(pks)
+    [pY, pX] = ind2sub(moon_dim,loc(peak)); 
+    location = [pY, pX];
+    distanceFromCenterSquared = (location - center).^2;
+    distCenterSqrt = sqrt(distanceFromCenterSquared);
+    distCenter = distCenterSqrt(1) + distCenterSqrt(2);
+    if  distCenter >= distance
+        toBeKept(peak) = 1;
+    end
+end
+
+indeces = find(toBeKept);
+pks = pks(indeces); loc = loc(indeces); widths = widths(indeces); proms = proms(indeces);
+
+[i, j] = ind2sub(size(moon_NFS), loc');
+plot3(j, i, log(pks + 1), '.r', 'markersize', 10);
+
+% Construct filter
+
+radius = 5; % Tunable
+ideal_filter = ones(moon_dim);
+for peak = 1:length(pks)
+    H = hpfilter('ideal', moon_dim(1), moon_dim(2), radius);
+    [shiftY, shiftX] = ind2sub(moon_dim, loc(peak));
+    H = circshift(H, [shiftY, shiftX]);
+    ideal_filter = H.*ideal_filter;
+end
+
+showSurf(ideal_filter, 'The created filter');
+
+filtered_F = moon_NFS.*ideal_filter;
+
+showSpectrum(filtered_F, '');
+
+filtered_f = real(ifft2(ifftshift(filtered_F)));
+
+figure; imshow(filtered_f(1:orgSize(1), 1:orgSize(2)), []);
 
 

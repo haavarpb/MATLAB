@@ -4,7 +4,7 @@ close all
 
 %% Basic frequency domain filtering using the Discrete Fourier Transform
 
-cd Pictures
+cd C:\Users\Håvard\Documents\MATLAB\AdvancedTopicsOnComputerVision\Practice1\Pictures
 f = im2double(imread('lena.gif'));
 cd ..
 
@@ -30,7 +30,7 @@ f = real(ifft2(ifftshift(G)));
 
 showImage(f, 'Filtered image with padding');
 
-showImage(f(1:sz(1), 1:sz(2)), 'Filtered image cropped');
+showImage(f(1:size_f(1), 1:size_f(2)), 'Filtered image cropped');
 
 %% Exercise 4.1
 % We modified the spectrum by applying a filter similar to the gaussian
@@ -71,6 +71,7 @@ lower_right = d_sq;
 d_non_cropped = [upper_left, upper_right;
                 lower_left, lower_right];
 sz = size(d_non_cropped);
+
 % Now we extract the core
 
 d_sq_mid = d_non_cropped((round(sz(1)/2) - round(M/2)):(round(sz(1)/2) + round(M/2)), ...

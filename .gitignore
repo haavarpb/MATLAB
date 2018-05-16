@@ -4,7 +4,8 @@
 !.gitignore
 !README.md
 !AdvancedTopicsOnComputerVision/
-!AdvancedTopicsOnComputerVision/*
-
-*.m# But blacklist these again
+!AdvancedTopicsOnComputerVision/ShortProject/
+AdvancedTopicsOnComputerVision/ShortProject/*
+!AdvancedTopicsOnComputerVision/ShortProject/*.m
+# Blacklist
 **.asv

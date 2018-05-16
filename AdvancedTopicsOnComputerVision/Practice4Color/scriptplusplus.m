@@ -4,7 +4,7 @@ clear all
 cd C:\Users\Håvard\Documents\MATLAB\AdvancedTopicsOnComputerVision\Practice4Color\colorimages
 
 bg = imread('back.png');
-i = imread('VC (8).png');
+i = imread('VC (5).png');
 
 cd ..
 
@@ -28,8 +28,8 @@ row_s = roi(1).BoundingBox(2);
 row_e = row_s + roi(1).BoundingBox(4);
 col_s = roi(1).BoundingBox(1);
 col_e = col_s + roi(1).BoundingBox(3);
-diff = i(row_s:row_e, col_s:col_e, :);
-
+% diff = i(row_s:row_e, col_s:col_e, :);
+% diff = i;
 figure; imshow(diff);
 
 % Extract the three channels
@@ -44,10 +44,10 @@ hist_g = imhist(diff_g, bins);
 hist_b = imhist(diff_b, bins);
 % 
 % % Display
-figure; subplot(1,2,1); bh = bar([hist_r hist_g hist_b]);
+figure; subplot(1,2,1); bh = bar(log([hist_r hist_g hist_b]+ 1));
 title('Histogram for RGB Values')
 xlabel('RGB Value')
-ylabel('Count')
+ylabel('Log(Count + 1)')
 bh(1).FaceColor = 'r';
 bh(2).FaceColor = 'g';
 bh(3).FaceColor = 'b';

@@ -6,5 +6,5 @@
 !AdvancedTopicsOnComputerVision/
 !AdvancedTopicsOnComputerVision/*
 
-# But blacklist these again
+*.m# But blacklist these again
 **.asv

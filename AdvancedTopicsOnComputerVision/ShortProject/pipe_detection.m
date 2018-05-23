@@ -3,7 +3,7 @@ clear all;
 clc;
 
 %% Pre-process image (madian filter, greyscale)
-I = imread('Easy_pipes\pipe_6.jpg');
+I = imread('Easy_pipes\pipe_3.jpg');
 g  = imresize(rgb2gray(I), 0.1);
 
 %% Edge detection
@@ -17,13 +17,14 @@ lines = houghlines(BW,theta,rho,peaks,'FillGap',500,'MinLength',200); % play wit
 
 %% Give parallell lines the same color
 thetaRange = 90; % Houghlines theta range
-resBin = 5; % Degrees resolution for each bin. Tunable
+resBin = 2; % Degrees resolution for each bin. Tunable
 numBins = thetaRange/resBin;
 offset = 90;
 
 numLines = zeros(numBins, 1);
 for k = 1:length(lines)
-    lines(k).bin = ceil( (abs(lines(k).theta) + 1) / thetaRange * numBins);
+    lines(k).bin = ceil( (abs(lines(k).theta) + 1) / (thetaRange + 1) * numBins);
+    lines(k).bin
     numLines(lines(k).bin) = numLines(lines(k).bin) + 1;
 end
 colours = ['r' 'g' 'b'];
@@ -37,6 +38,7 @@ for k = 1:length(lines)
         lines(k).colour = colours(3);
     end
 end
+
 %% Plot Hough Lines
 figure, imshow(g), hold on
 for k = 1:length(lines)

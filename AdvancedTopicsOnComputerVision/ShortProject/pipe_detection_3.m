@@ -6,13 +6,12 @@ number_of_pipes=1; % to create a function later, so far we will work with 1 only
 
 %% Pre-process image
 
-I = imread('easy_pipes\pipe_5.jpg');
-% I = imread('easy_pipes\pipe_1.jpg');
+I = imread('ezpipes/pipe1.jpg');
 % IF YOU GET WARNING ABOUT IMAGE IS TO BIG THIS ALGO WONT WORK
 % IF YOU TRY NEW IMAGES AND THINGS CRASH CHECK THE FOLLOWING:
 % - CHECK THAT THE HOUGH LINE PLOTTER DRAWS THE LINE ALL THE WAY TO EDGE
 % - CHECK ALSO THAT THE CROP IN HOUGHLINES PLOTTER DOESN'T FUCK UP THE CROP
-g = imresize(rgb2gray(I), 0.1);
+g = imresize(rgb2gray(I), 0.5);
 
 %% Edge detection
 
@@ -56,7 +55,7 @@ cracks = imbinarize(cracks, 0.6); % Need to find a good threshold
 
 %% Crack evaluation
 stats = regionprops(cracks);
-% figure; imshow(g);
+figure; imshow(g);
 hold on;
 for k = 1 : length(stats) % Loop through all blobs.
 	% Find the bounding box of each blob.

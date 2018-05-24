@@ -66,7 +66,7 @@ image_pos = floor(fig.Children.Position)
 frame = getframe(gcf);
 frame_image_gray = rgb2gray(frame.cdata);
 % DEPENDING ON THE IMAGES IT MIGHT SHIFT A BIT AND FUCK UP THE FILLING
-cut_rows = (size(frame_image_gray, 1) - image_pos(2) - image_pos(4)):(size(frame_image_gray, 1) - image_pos(2) - 1);
+cut_rows = (size(frame_image_gray, 1) - image_pos(2) - image_pos(4) + 2):(size(frame_image_gray, 1) - image_pos(2) + 1);
 cut_cols = (size(frame_image_gray, 2) - image_pos(1) - image_pos(3)):(size(frame_image_gray, 2) - image_pos(1) - 1);
 I_burned = frame_image_gray(cut_rows, cut_cols);
 

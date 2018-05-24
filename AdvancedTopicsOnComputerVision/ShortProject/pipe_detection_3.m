@@ -1,18 +1,18 @@
 close all;
 clear all;
-clc;
+%clc;
 
 number_of_pipes=1; % to create a function later, so far we will work with 1 only
 
 %% Pre-process image
 
-I = imread('ezpipes\pipe3.jpg');
+I = imread('easy_pipes\pipe_5.jpg');
 % I = imread('easy_pipes\pipe_1.jpg');
 % IF YOU GET WARNING ABOUT IMAGE IS TO BIG THIS ALGO WONT WORK
 % IF YOU TRY NEW IMAGES AND THINGS CRASH CHECK THE FOLLOWING:
 % - CHECK THAT THE HOUGH LINE PLOTTER DRAWS THE LINE ALL THE WAY TO EDGE
 % - CHECK ALSO THAT THE CROP IN HOUGHLINES PLOTTER DOESN'T FUCK UP THE CROP
-g = imresize(rgb2gray(I), 0.5);
+g = imresize(rgb2gray(I), 0.1);
 
 %% Edge detection
 
@@ -34,7 +34,7 @@ g_lines = addHoughLines(g, lines);
 %% Isolate cracks
 
 pipe_edges = imbinarize(g_lines, 0.99); % The lines are drawn in complete white, so we can threshold almost everything
-% figure; imshowpair(g_lines, pipe_edges, 'montage');
+figure; imshowpair(g_lines, pipe_edges, 'montage');
 
 % Now we want a mask to look at the pipes irregularities
 % PLAN
@@ -52,11 +52,11 @@ filled = fillPipe(pipe_edges, lines);
 masked = g.*uint8(filled);
 cracks = imfilter(masked, fspecial('sobel')*fspecial('sobel')');
 cracks = imbinarize(cracks, 0.6); % Need to find a good threshold
-figure; imshowpair(masked, cracks, 'montage');
+% figure; imshowpair(masked, cracks, 'montage');
 
 %% Crack evaluation
 stats = regionprops(cracks);
-figure; imshow(g);
+% figure; imshow(g);
 hold on;
 for k = 1 : length(stats) % Loop through all blobs.
 	% Find the bounding box of each blob.

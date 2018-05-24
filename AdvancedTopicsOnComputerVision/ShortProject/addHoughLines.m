@@ -8,7 +8,7 @@ else
     s1 = size(I, 2);
     s2 = size(I, 1);
 end
-fig = figure('visible', 'off');
+fig = figure;
 imshow(I);
 hold on;
 for k = 1:length(hough_lines)
@@ -25,10 +25,10 @@ for k = 1:length(hough_lines)
     xy = zeros(2,2);
     j = 1;
     if (xup ~= Inf) && (xup ~= -Inf)
-        xy(j,:) = [xup, 0];
+        xy(j,:) = [xup + 1, 0];
         j = j+1;
         if j==3
-            plot(xy(:,1),xy(:,2),'LineWidth',2,'Color','white');
+            plot(xy(:,1),xy(:,2),'LineWidth',4,'Color','white');
                 continue;
         end
     end
@@ -36,7 +36,7 @@ for k = 1:length(hough_lines)
         xy(j,:) = [xdown + 1, s2 + 1];
         j = j+1;
         if j==3  
-            plot(xy(:,1),xy(:,2),'LineWidth',2,'Color','white');
+            plot(xy(:,1),xy(:,2),'LineWidth',4,'Color','white');
             continue;
         end
     end
@@ -44,7 +44,7 @@ for k = 1:length(hough_lines)
         xy(j,:) = [0, yleft + 1];
         j = j+1;
         if j==3
-            plot(xy(:,1),xy(:,2),'LineWidth',2,'Color','white');
+            plot(xy(:,1),xy(:,2),'LineWidth',4,'Color','white');
             continue;
         end
     end
@@ -52,7 +52,7 @@ for k = 1:length(hough_lines)
         xy(j,:) = [s2 + 1, yright + 1];
         j = j+1;
         if j==3
-            plot(xy(:,1),xy(:,2),'LineWidth',2,'Color','white');
+            plot(xy(:,1),xy(:,2),'LineWidth',4,'Color','white');
             continue;
         end
     end
@@ -61,12 +61,13 @@ end
 hold off;
 
 fig.Children.Units = 'pixels';
-image_pos = floor(fig.Children.Position);
+fig.Children.Position
+image_pos = floor(fig.Children.Position)
 frame = getframe(gcf);
 frame_image_gray = rgb2gray(frame.cdata);
 % DEPENDING ON THE IMAGES IT MIGHT SHIFT A BIT AND FUCK UP THE FILLING
-cut_rows = (size(frame_image_gray, 1) - image_pos(2) - image_pos(4) + 2):(size(frame_image_gray, 1) - image_pos(2) + 1);
-cut_cols = (size(frame_image_gray, 2) - image_pos(1) - image_pos(3) + 2):(size(frame_image_gray, 2) - image_pos(1) + 1);
+cut_rows = (size(frame_image_gray, 1) - image_pos(2) - image_pos(4)):(size(frame_image_gray, 1) - image_pos(2) - 1);
+cut_cols = (size(frame_image_gray, 2) - image_pos(1) - image_pos(3)):(size(frame_image_gray, 2) - image_pos(1) - 1);
 I_burned = frame_image_gray(cut_rows, cut_cols);
 
 end

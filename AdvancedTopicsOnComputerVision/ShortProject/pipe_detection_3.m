@@ -4,104 +4,44 @@ clc;
 
 number_of_pipes=1; % to create a function later, so far we will work with 1 only
 
-% Adaptative binarization
-
 %% Pre-process image
 
-I = imread('easy_pipes\pipe_4.jpg');
-figure; imshow(I); title('Original image');
-g = imresize(rgb2gray(I), 0.1);
-% [M, N] = size(g);
-% med = medfilt2(g, [5 5]);
-% rotI = imrotate(med,33,'crop');
-% b = imbinarize(gr);
+I = imread('Easy_pipes\pipe_2.jpg');
+g = imresize(rgb2gray(I), 0.5);
 
-% Try different preprocessing methods/more (bilateral filter?)
 %% Edge detection
-edges = edge(g,'Sobel');
-figure; imshow(edges); title('Image after Sobel edges');
 
-% Try different edge detectors
+edges = edge(g,'Sobel', [], 'both', 'nothinning');
+%edges = edge(g, 'log');
+figure; imshowpair(g, edges, 'montage'); title('Image after Sobel edges');
+
 %% Hough transform
-[H,theta,rho] = hough(edges,'RhoResolution',0.5,'Theta',-90:0.5:89.5);
-if number_of_pipes==1
-    n=2;
-elseif number_of_pipes==2
-    n=4
-end
-peaks  = houghpeaks(H,n,'threshold',ceil(0.3*max(H(:))));  % play with the number of peaks
+
+[H,theta,rho] = hough(edges,'RhoResolution',0.5,'Theta',-90:1:89);
+number_of_lines= number_of_pipes*2;
+peaks  = houghpeaks(H,number_of_lines,'threshold',ceil(0.3*max(H(:))));  % play with the number of peaks
+%peaks  = houghpeaks(H,number_of_lines);
 lines = houghlines(edges,theta,rho,peaks,'FillGap',200,'MinLength',200); % play with the FillGap and MinLenght parameters
-
+%lines = houghlines(edges,theta,rho,peaks);
 %% Plot Hough lines cuts with the axis
-figure, imshow(edges), hold on;
 
-% Calculate the cuts of the line with the 4 axis
-for k = 1:length(lines)
-    rho = lines(k).rho;
-    theta = lines(k).theta;
-    xup = rho/cosd(theta);
-    xdown = (rho - size(g, 2)*sind(theta))/cosd(theta);
-    yleft = rho/sind(theta);
-    yright = (rho - size(g,1)*cosd(theta))/sind(theta);
-    
-    % Check if the cut points are valid (different from Inf and -Inf)
-    % and plot the line between them
-    xy = zeros(2,2);
-    j = 1;
-    
-        if (xup ~= Inf) && (xup ~= -Inf)
-            xy(j,:) = [xup, 0];
-            j = j+1;
-            if j==3
-                plot(xy(:,1),xy(:,2),'LineWidth',2,'Color','white');
-                    continue
-                end
-        end
-        if (xdown ~= Inf) && (xdown ~= -Inf)
-            xy(j,:) = [xdown, size(g,2)];
-            j = j+1;
-                if j==3
-                    plot(xy(:,1),xy(:,2),'LineWidth',2,'Color','white');
-                    continue
-                end
-        end
-        if (yleft ~= Inf) && (yleft ~= -Inf)
-            xy(j,:) = [0, yleft];
-            j = j+1;
-                if j==3
-                    plot(xy(:,1),xy(:,2),'LineWidth',2,'Color','white');
-                    continue
-                end
-        end
-        if (yright ~= Inf) && (yright ~= -Inf)
-            xy(j,:) = [size(g,2), yright];
-            j = j+1;
-                if j==3
-                    plot(xy(:,1),xy(:,2),'LineWidth',2,'Color','white');
-                    continue
-                end
-        end
-end
-
-hold off;
-F = getframe(gcf); % Captures the image with the Hough lines plotted
-[X, Map] = frame2im(F); % Converts it into the variable X
-H = imcrop(X, [87, 30, 399, 299]); % Cut it to size 300 x 400
-gray_hough = rgb2gray(H); 
-figure; imshow(gray_hough);
+bw = addHoughLines(g, lines);
+figure;imshow(bw);
 
 %% Morphologic operations
 
-se_opening = strel('square',2);
-opening = imopen(gray_hough, se_opening); % opening to eliminate everything but the pipe
+se_opening = strel('square',3);
+opening = imopen(bw, se_opening); % opening to eliminate everything but the pipe
 figure; imshow(opening);
 
 se_closing = strel('square',50); % fill the pipe with white pixels
 closing = imclose(opening, se_closing);
 figure; imshow(closing); title('Image after morphologic operations');
 
-segmentation = closing.*gray_hough; % apply the closing mask on the edges image + the hough lines
+segmentation = closing.*bw; % apply the closing mask on the edges image + the hough lines
 figure; imshow(segmentation); title('Segmented pipe');
+
+figure; imshow(segmentation - imopen(segmentation, ones(3)))
 
 %% Crack evaluation
 stats = regionprops(segmentation);

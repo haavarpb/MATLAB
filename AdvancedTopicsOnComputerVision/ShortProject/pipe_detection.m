@@ -3,7 +3,7 @@ clear all;
 clc;
 
 %% Pre-process image (madian filter, greyscale)
-I = imread('Easy_pipes\pipe_3.jpg');
+I = imread('Easy_pipes\pipe_2.jpg');
 g  = imresize(rgb2gray(I), 0.1);
 
 %% Edge detection
@@ -60,8 +60,9 @@ for k = 1:length(lines)
             p = [p; temp(point,:)];
         end
     end
-    plot(p(:,1), p(:,2), 'linewidth', 2, 'color', lines(k).colour);
+    plot(p(:,1), p(:,2), 'linewidth', 2, 'color', 'green');
 end
+hold off;
 
 
 

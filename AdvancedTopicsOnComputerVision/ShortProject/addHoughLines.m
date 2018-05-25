@@ -8,7 +8,7 @@ else
     s1 = size(I, 2);
     s2 = size(I, 1);
 end
-fig = figure;
+fig = figure('visible','off');
 imshow(I);
 hold on;
 for k = 1:length(hough_lines)
@@ -61,8 +61,7 @@ end
 hold off;
 
 fig.Children.Units = 'pixels';
-fig.Children.Position
-image_pos = floor(fig.Children.Position)
+image_pos = floor(fig.Children.Position);
 frame = getframe(gcf);
 frame_image_gray = rgb2gray(frame.cdata);
 % DEPENDING ON THE IMAGES IT MIGHT SHIFT A BIT AND FUCK UP THE FILLING

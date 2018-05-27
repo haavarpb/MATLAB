@@ -1,6 +1,7 @@
 function [I_burned] = addHoughLines(I, hough_lines)
 %ADDHOUGHLINES Burns the plots of hough_lines in hough_lines into the image
 %I
+
 if size(I, 1) < size(I, 2)
     s1 = size(I, 1);
     s2 = size(I, 2);

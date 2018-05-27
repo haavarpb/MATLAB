@@ -6,12 +6,12 @@ number_of_pipes=1; % to create a function later, so far we will work with 1 only
 
 %% Pre-process image
 
-I = imread('ezpipes/pipe2.jpg');
+I = imread('easy_pipes/pipe_4.jpg');
 % IF YOU GET WARNING ABOUT IMAGE IS TO BIG THIS ALGO WONT WORK
 % IF YOU TRY NEW IMAGES AND THINGS CRASH CHECK THE FOLLOWING:
 % - CHECK THAT THE HOUGH LINE PLOTTER DRAWS THE LINE ALL THE WAY TO EDGE
 % - CHECK ALSO THAT THE CROP IN HOUGHLINES PLOTTER DOESN'T FUCK UP THE CROP
-g = imresize(rgb2gray(I), 0.5);
+g = imresize(rgb2gray(I), 0.1);
 
 %% Edge detection
 
@@ -25,10 +25,13 @@ number_of_lines= number_of_pipes*2;
 peaks  = houghpeaks(H,number_of_lines,'threshold',ceil(0.3*max(H(:))));  % play with the number of peaks
 lines = houghlines(edges,theta,rho,peaks,'FillGap',200,'MinLength',200); % play with the FillGap and MinLenght parameters
 
+for line = 1:length(lines)
+    if lines(line).rho < 0
+        lines(line).rho = abs(lines(line).rho);
+        lines(line).theta = lines(line).theta + 180;
+    end
+end
 g_lines = addHoughLines(g, lines);
-
-% POTENTIAL ADDITION IF TIME:
-% CONFIRM THAT ITS A PIPE AND NOT TWO RANDOMLY PARALLELL LINES
 
 %% Isolate cracks
 

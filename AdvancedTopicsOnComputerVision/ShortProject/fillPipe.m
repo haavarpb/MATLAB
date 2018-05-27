@@ -10,9 +10,8 @@ shortest_index = find(len == min(len));
 pipe_width = len(farthest_index) - len(shortest_index);
 pipe_center_line = len(farthest_index) - pipe_width/2;
 
-fill_location = floor([pipe_center_line*sind(dir(farthest_index)) ... % Y pos
-                        pipe_center_line*cosd(dir(farthest_index)) ] + 1); % X pos (+ 1 to shift into matrix indeces
-             
+fill_location = abs(floor([pipe_center_line*sind(dir(farthest_index)) ... % Y pos
+                        pipe_center_line*cosd(dir(farthest_index)) ] + 1)); % X pos (+ 1 to shift into matrix indeces
 filled = imfill(pipe_edges, fill_location);
-
+filled = imerode(filled, ones(floor(0.2*pipe_width)));
 end

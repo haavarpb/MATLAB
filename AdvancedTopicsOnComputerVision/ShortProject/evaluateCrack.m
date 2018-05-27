@@ -1,35 +1,4 @@
-close all;
-clear all;
-%clc;
-
-number_of_pipes=1; % to create a function later, so far we will work with 1 only
-
-%% Pre-process image
-
-I = imread('ezpipes/pipe2.jpg');
-% IF YOU GET WARNING ABOUT IMAGE IS TO BIG THIS ALGO WONT WORK
-% IF YOU TRY NEW IMAGES AND THINGS CRASH CHECK THE FOLLOWING:
-% - CHECK THAT THE HOUGH LINE PLOTTER DRAWS THE LINE ALL THE WAY TO EDGE
-% - CHECK ALSO THAT THE CROP IN HOUGHLINES PLOTTER DOESN'T FUCK UP THE CROP
-g = imresize(rgb2gray(I), 0.5);
-
-%% Edge detection
-
-edges = edge(g,'Sobel', 'nothinning');
-%figure; imshowpair(g, edges, 'montage');
-
-%% Hough transform
-
-[H,theta,rho] = hough(edges,'RhoResolution',0.5,'Theta',-90:0.5:89.50);
-number_of_lines= number_of_pipes*2;
-peaks  = houghpeaks(H,number_of_lines,'threshold',ceil(0.3*max(H(:))));  % play with the number of peaks
-lines = houghlines(edges,theta,rho,peaks,'FillGap',200,'MinLength',200); % play with the FillGap and MinLenght parameters
-
-g_lines = addHoughLines(g, lines);
-
-% POTENTIAL ADDITION IF TIME:
-% CONFIRM THAT ITS A PIPE AND NOT TWO RANDOMLY PARALLELL LINES
-
+function [] = evaluateCrack(g, g_lines, lines)
 %% Isolate cracks
 
 pipe_edges = imbinarize(g_lines, 0.99); % The lines are drawn in complete white, so we can threshold almost everything
@@ -77,16 +46,23 @@ response = imboxfilt(search_image, boxSize, 'Padding', 0, 'NormalizationFactor',
 
 %% Grade crack
 % Thresholding response
+thresh_yellow = 5;
+thresh_red = 20;
 
-thresh_red = 7;
+grade_yellow = response(response > thresh_yellow & response < thresh_red);
+grade_red = response(response > thresh_red);
 
-grade_red = logical(zeros(size(cracks)));
-grade_red(response > thresh_red) = 1;
-
+stats_yellow = regionprops(grade_yellow);
 stats_red = regionprops(grade_red);
 
 figure; imshow(g);
 hold on;
+for k = 1 : length(stats_yellow) % Loop through all blobs.
+	% Find the bounding box of each blob.
+	thisBlobsBoundingBox = stats_yellow(k).BoundingBox;  
+	rectangle('Position', thisBlobsBoundingBox, 'edgecolor', 'yellow');
+end
+
 for k = 1 : length(stats_red) % Loop through all blobs.
 	% Find the bounding box of each blob.
 	thisBlobsBoundingBox = stats_red(k).BoundingBox;  
@@ -97,3 +73,25 @@ hold off
 % IDEA
 % - Since not all boxes are connected, make a box search (size % of radius)
 % - If (pixel area > thresh) -> crack detected!
+end
+
+function [filled, pipe_width] = fillPipe(pipe_edges, hough_lines)
+%FILLPIPE fills a pipe given as a two element structure given by
+%houghlines()
+
+dir = [hough_lines.theta];
+len = [hough_lines.rho];
+
+farthest_index = find(len == max(len)); % Finds the index of the greatest line
+shortest_index = find(len == min(len));
+pipe_width = len(farthest_index) - len(shortest_index);
+pipe_center_line = len(farthest_index) - pipe_width/2;
+
+fill_location = floor([pipe_center_line*sind(dir(farthest_index)) ... % Y pos
+                        pipe_center_line*cosd(dir(farthest_index)) ] + 1); % X pos (+ 1 to shift into matrix indeces
+             
+filled = imfill(pipe_edges, fill_location);
+
+end
+
+

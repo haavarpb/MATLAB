@@ -16,4 +16,3 @@ fill_location = floor([pipe_center_line*sind(dir(farthest_index)) ... % Y pos
 filled = imfill(pipe_edges, fill_location);
 
 end
-

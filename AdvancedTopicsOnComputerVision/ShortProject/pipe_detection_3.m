@@ -15,7 +15,7 @@ g = imresize(rgb2gray(I), 0.1);
 
 %% Edge detection
 
-edges = edge(g,'Sobel', 'nothinning');
+edges = edge(g,'Sobel');
 %figure; imshowpair(g, edges, 'montage');
 
 %% Hough transform
@@ -51,10 +51,10 @@ pipe_edges = imbinarize(g_lines, 0.99); % The lines are drawn in complete white,
 % figure; imshow(filled);
 
 % We mask out the original image
-masked = g.*uint8(filled);
-cracks = imfilter(masked, fspecial('sobel')*fspecial('sobel')');
-cracks = imbinarize(cracks, 0.7); % Need to find a good threshold
-% figure; imshowpair(masked, cracks, 'montage');
+cracks = imfilter(g, fspecial('sobel')*fspecial('sobel')');
+masked = cracks.*uint8(filled);
+% cracks = imbinarize(cracks, 0.7); % Need to find a good threshold
+figure; imshowpair(masked, filled, 'montage');
 
 %% Crack evaluation
 % Idea:
@@ -63,12 +63,16 @@ cracks = imbinarize(cracks, 0.7); % Need to find a good threshold
 % - Size of window proportional of pipe width
 % - Threshold densities to get severity
 
-search_image = zeros(size(cracks));
-stats = regionprops(cracks); % Extracts centroids, area and boundingbox
+search_image = zeros(size(masked));
+stats = regionprops(masked); % Extracts centroids, area and boundingbox
 centroid_coordinates = floor(reshape(extractfield(stats, 'Centroid'), 2, []))'; % [X Y]
-centroid_area = extractfield(stats,'Area');
 X = centroid_coordinates(:,1)';
+valid = ~isnan(X);
+X = X(valid);
 Y = centroid_coordinates(:,2)';
+Y = Y(valid);
+centroid_area = extractfield(stats,'Area');
+centroid_area = centroid_area(valid);
 idx = sub2ind(size(search_image), Y, X);
 search_image(idx) = centroid_area; % Now search_image contains each centroid weighted with its pixel area it represents
 boxSize = floor(pipe_width/6); % Size of searchbox relative to pipe size
@@ -81,9 +85,9 @@ response = imboxfilt(search_image, boxSize, 'Padding', 0, 'NormalizationFactor',
 %% Grade crack
 % Thresholding response
 
-thresh_red = 7;
+thresh_red = 5;
 
-grade_red = logical(zeros(size(cracks)));
+grade_red = logical(zeros(size(masked)));
 grade_red(response > thresh_red) = 1;
 
 stats_red = regionprops(grade_red);

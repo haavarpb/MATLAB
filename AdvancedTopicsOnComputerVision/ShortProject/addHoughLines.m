@@ -29,7 +29,7 @@ for k = 1:length(hough_lines)
         xy(j,:) = [xup + 1, 0];
         j = j+1;
         if j==3
-            plot(xy(:,1),xy(:,2),'LineWidth',4,'Color','white');
+            plot(xy(:,1),xy(:,2),'LineWidth',2,'Color','white');
                 continue;
         end
     end
@@ -37,7 +37,7 @@ for k = 1:length(hough_lines)
         xy(j,:) = [xdown + 1, s2 + 1];
         j = j+1;
         if j==3  
-            plot(xy(:,1),xy(:,2),'LineWidth',4,'Color','white');
+            plot(xy(:,1),xy(:,2),'LineWidth',2,'Color','white');
             continue;
         end
     end
@@ -45,7 +45,7 @@ for k = 1:length(hough_lines)
         xy(j,:) = [0, yleft + 1];
         j = j+1;
         if j==3
-            plot(xy(:,1),xy(:,2),'LineWidth',4,'Color','white');
+            plot(xy(:,1),xy(:,2),'LineWidth',2,'Color','white');
             continue;
         end
     end
@@ -53,7 +53,7 @@ for k = 1:length(hough_lines)
         xy(j,:) = [s2 + 1, yright + 1];
         j = j+1;
         if j==3
-            plot(xy(:,1),xy(:,2),'LineWidth',4,'Color','white');
+            plot(xy(:,1),xy(:,2),'LineWidth',2,'Color','white');
             continue;
         end
     end

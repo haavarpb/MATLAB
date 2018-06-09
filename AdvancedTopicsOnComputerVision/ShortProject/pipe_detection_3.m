@@ -6,7 +6,7 @@ number_of_pipes=1; % to create a function later, so far we will work with 1 only
 
 %% Pre-process image
 
-I = imread('easy_pipes/pipe_4.jpg');
+I = imread('easy_pipes/pipe_5.jpg');
 % IF YOU GET WARNING ABOUT IMAGE IS TO BIG THIS ALGO WONT WORK
 % IF YOU TRY NEW IMAGES AND THINGS CRASH CHECK THE FOLLOWING:
 % - CHECK THAT THE HOUGH LINE PLOTTER DRAWS THE LINE ALL THE WAY TO EDGE
@@ -15,7 +15,7 @@ g = imresize(rgb2gray(I), 0.1);
 
 %% Edge detection
 
-edges = edge(g,'Sobel');
+edges = edge(g,'Sobel', 'nothinning');
 %figure; imshowpair(g, edges, 'montage');
 
 %% Hough transform
@@ -31,7 +31,8 @@ for line = 1:length(lines)
         lines(line).theta = lines(line).theta + 180;
     end
 end
-g_lines = addHoughLines(g, lines);
+dim_light = 10;
+g_lines = addHoughLines(g-dim_light, lines);
 
 %% Isolate cracks
 
@@ -52,9 +53,15 @@ pipe_edges = imbinarize(g_lines, 0.99); % The lines are drawn in complete white,
 
 % We mask out the original image
 cracks = imfilter(g, fspecial('sobel')*fspecial('sobel')');
-masked = cracks.*uint8(filled);
-% cracks = imbinarize(cracks, 0.7); % Need to find a good threshold
-figure; imshowpair(masked, filled, 'montage');
+masked_pipe_cracks = cracks.*uint8(filled);
+
+%figure; imshowpair(masked_pipe_cracks, filled, 'montage');
+%% TEXTURE AND LINES EVAL
+
+entropy(masked_pipe_cracks)
+figure; imshowpair(masked_pipe_cracks, g_lines, 'montage');
+
+
 
 %% Crack evaluation
 % Idea:
@@ -63,8 +70,8 @@ figure; imshowpair(masked, filled, 'montage');
 % - Size of window proportional of pipe width
 % - Threshold densities to get severity
 
-search_image = zeros(size(masked));
-stats = regionprops(masked); % Extracts centroids, area and boundingbox
+search_image = zeros(size(masked_pipe_cracks));
+stats = regionprops(masked_pipe_cracks); % Extracts centroids, area and boundingbox
 centroid_coordinates = floor(reshape(extractfield(stats, 'Centroid'), 2, []))'; % [X Y]
 X = centroid_coordinates(:,1)';
 valid = ~isnan(X);
@@ -82,24 +89,24 @@ else %even
 end
 response = imboxfilt(search_image, boxSize, 'Padding', 0, 'NormalizationFactor', 1); % Sum box to get a pixel density
 
-%% Grade crack
-% Thresholding response
-
-thresh_red = 5;
-
-grade_red = logical(zeros(size(masked)));
-grade_red(response > thresh_red) = 1;
-
-stats_red = regionprops(grade_red);
-
-figure; imshow(g);
-hold on;
-for k = 1 : length(stats_red) % Loop through all blobs.
-	% Find the bounding box of each blob.
-	thisBlobsBoundingBox = stats_red(k).BoundingBox;  
-	rectangle('Position', thisBlobsBoundingBox, 'edgecolor', 'red');
-end
-hold off
+% %% Grade crack
+% % Thresholding response
+% 
+% thresh_red = 5;
+% 
+% grade_red = logical(zeros(size(masked_pipe_cracks)));
+% grade_red(response > thresh_red) = 1;
+% 
+% stats_red = regionprops(grade_red);
+% 
+% figure; imshow(g);
+% hold on;
+% for k = 1 : length(stats_red) % Loop through all blobs.
+% 	% Find the bounding box of each blob.
+% 	thisBlobsBoundingBox = stats_red(k).BoundingBox;  
+% 	rectangle('Position', thisBlobsBoundingBox, 'edgecolor', 'red');
+% end
+% hold off
 
 % IDEA
 % - Since not all boxes are connected, make a box search (size % of radius)
